@@ -1,0 +1,88 @@
+#!/bin/bash
+
+# input params
+EXEC="${APP_NAME}"
+
+# move into working directory
+echo "Stepping into '${WRK_DIR}'..."
+cd ${WRK_DIR}
+printf "{\n" > ${JSON_OUTPUT}
+printf "\t\"machine\": \"%s\",\n" "lassen" >> ${JSON_OUTPUT}
+printf "\t\"app\": \"%s\",\n" "${APP_NAME}" >> ${JSON_OUTPUT}
+printf "\t\"exec\": \"%s\",\n" "${EXEC}" >> ${JSON_OUTPUT}
+printf "\t\"args\": \"%s\",\n" "${ARGS}" >> ${JSON_OUTPUT}
+printf "\t\"ranks\": \"%s\",\n" "${NRANKS}" >> ${JSON_OUTPUT}
+printf "\t\"events\": \"%s\",\n" "${HPCRUN_EVENTS}" >> ${JSON_OUTPUT}
+printf "\t\"path\": \"%s\",\n" "${WRK_DIR}" >> ${JSON_OUTPUT}
+
+
+# papi -- /collab/usr/global/tools/hpctoolkit/blueos_3_ppc64le_ib_p9/.install/2022-05/packages/linux-rhel7-power9le/gcc-8.3.1/papi-6.0.0.1-2jeube7w3gnkio7o7rqw5ws3bjwrflpf
+
+# load needed modules
+module load ${MODULES}
+spack env activate ${ENV_NAME}
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/collab/usr/global/tools/hpctoolkit/blueos_3_ppc64le_ib_p9/.install/2022-05/packages/linux-rhel7-power9le/gcc-8.3.1/papi-6.0.0.1-2jeube7w3gnkio7o7rqw5ws3bjwrflpf/lib"
+if [ $? -ne 0 ]; then exit 1; fi
+printf "\t\"modules\": \"%s\",\n" "${MODULES}" >> ${JSON_OUTPUT}
+printf "\t\"spack_env\": \"%s\",\n" "${ENV_NAME}" >> ${JSON_OUTPUT}
+source /usr/WS1/dnicho/summer2022/resource-equivalences/data-collection/utilities.bash
+
+# hpctoolkit -- static analysis
+echo "Creating hpcstruct file..."
+START=$(timestamp)
+EXEC_PATH=`which ${EXEC}`
+if [ $? -ne 0 ]; then exit 1; fi
+printf "\t\"exec_path\": \"%s\",\n" "${EXEC_PATH}" >> ${JSON_OUTPUT}
+#hpcstruct ${EXEC_PATH} -o "${EXEC}.hpcstruct"
+END=$(timestamp)
+DURATION=$(diff_minutes $START $END)
+echo "Took ${DURATION} minutes."
+
+# run app with default timing
+echo "Running on on ${NRANKS} ranks..."
+START=$(timestamp)
+jsrun -n 1 -p ${NRANKS} -c ${NRANKS} -g 1 -M "-gpu" \
+    hpcrun -o hpctoolkit-measurements ${HPCRUN_EVENTS} \
+    ${EXEC} ${ARGS} 2> ${WRK_DIR}/std.err 1> ${WRK_DIR}/std.out
+END=$(timestamp)
+DURATION=$(diff_minutes $START $END)
+echo "Took ${DURATION} minutes."
+printf "\t\"duration\": \"%s\"\n" "${DURATION}" >> ${JSON_OUTPUT}
+printf "}\n" >> ${JSON_OUTPUT}
+
+# re-process measurements dir with hpcstruct
+echo "Parsing measurements with hpcstruct..."
+START=$(timestamp)
+hpcstruct hpctoolkit-measurements
+END=$(timestamp)
+DURATION=$(diff_minutes $START $END)
+echo "Took ${DURATION} minutes."
+
+# build profile database
+echo "Creating database..."
+START=$(timestamp)
+lrun -n ${NRANKS} \
+    hpcprof-mpi --metric-db=yes -o hpctoolkit-database \
+    hpctoolkit-measurements
+END=$(timestamp)
+DURATION=$(diff_minutes $START $END)
+echo "Took ${DURATION} minutes."
+
+# collect counters
+echo "Parsing counters..."
+START=$(timestamp)
+#python3 /usr/WS1/dnicho/summer2022/resource-equivalences/data-collection/read-counters.py \
+#    --input hpctoolkit-database --append ${JSON_OUTPUT}
+END=$(timestamp)
+DURATION=$(diff_minutes $START $END)
+echo "Took ${DURATION} minutes."
+
+# cleanup
+echo "Cleaning up..."
+START=$(timestamp)
+#rm "${EXEC}.hpcstruct"
+#rm -r "hpctoolkit-measurements"
+#rm -r "hpctoolkit-database"
+END=$(timestamp)
+DURATION=$(diff_minutes $START $END)
+echo "Took ${DURATION} minutes."

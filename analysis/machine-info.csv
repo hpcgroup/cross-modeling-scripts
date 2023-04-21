@@ -1,0 +1,5 @@
+machine,cpu_arch,gpu_arch,cpu_cores,cpu_clock_rate,l2_cache_size,l3_cache_size,memory
+quartz,intel,none,36,
+ruby,intel,none,
+lassen,power9,nvidia,
+corona,amd,amd,
