@@ -7,7 +7,7 @@ DATA_ROOT="/usr/WS1/dnicho/summer2022/resource-equivalences/data"
 export JSON_OUTPUT="results.json"
 JOB_NAME="data-collection-${APP_NAME}"
 SUB_DIR=$(echo "${APP_NAME} ${ARGS} ${NRANKS} ${HPCRUN_EVENTS}" | md5sum | awk '{print $1}')
-QUEUE="pbatch"
+# QUEUE="pbatch"
 
 HOST=$(hostname)
 
