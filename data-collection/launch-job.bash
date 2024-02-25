@@ -2,14 +2,16 @@
 
 # turn on dry output
 DRY=0
+# DRY=1
 
-DATA_ROOT="/usr/WS1/dnicho/summer2022/resource-equivalences/data"
+# DATA_ROOT="/usr/WS1/dnicho/summer2022/resource-equivalences/data"
+DATA_ROOT=${ROOT}/data
 export JSON_OUTPUT="results.json"
 JOB_NAME="data-collection-${APP_NAME}"
 SUB_DIR=$(echo "${APP_NAME} ${ARGS} ${NRANKS} ${HPCRUN_EVENTS}" | md5sum | awk '{print $1}')
 # QUEUE="pbatch"
 
-HOST=$(hostname)
+# HOST=$(hostname)
 
 if [[ ${HOST} == quartz* ]]; then
     SYSTEM="quartz"
@@ -109,6 +111,31 @@ elif [[ ${HOST} == corona* ]]; then
         echo "sbatch -J ${JOB_NAME} -t ${TIME_LIMIT} -n ${NRANKS} --output ${output} --error ${error} -p ${QUEUE} run-corona.flux"
     else
         flux batch -t ${TIME_LIMIT} -N 1 --output=${output} --error=${error} run-corona.flux
+    fi
+elif [[ ${HOST} == zaratan* ]]; then
+    SYSTEM="zaratan"
+    export WRK_DIR="${DATA_ROOT}/${SYSTEM}/${APP_NAME}/${SUB_DIR}"
+    if [ -d ${WRK_DIR} ]; then 
+        echo "Directory '${WRK_DIR}' already exists."
+        # exit 1
+    else
+        if [ ${DRY} -ne 0 ]; then
+            echo "mkdir -p ${WRK_DIR}"
+        else
+            echo "mkdir -p ${WRK_DIR}"
+            mkdir -p ${WRK_DIR}
+        fi
+    fi
+
+    output="${WRK_DIR}/std.out"
+    error="${WRK_DIR}/std.err"
+
+    echo "about to call sbatch"
+    if [ ${DRY} -ne 0 ]; then
+        echo "sbatch -J ${JOB_NAME} -t ${TIME_LIMIT} -n ${NRANKS} --output ${output} --error ${error} -p ${QUEUE} run-zaratan.sh"
+    else
+        echo "sbatch -J ${JOB_NAME} -t ${TIME_LIMIT} -n ${NRANKS} --output ${output} --error ${error} -p ${QUEUE} run-zaratan.sh"
+        sbatch -J ${JOB_NAME} -t ${TIME_LIMIT} -n ${NRANKS} --output ${output} --error ${error} -p ${QUEUE} run-zaratan.sh
     fi
 else
     echo "unknown host"

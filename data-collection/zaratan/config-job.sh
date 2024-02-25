@@ -1,12 +1,15 @@
 #!/bin/bash
 
 # constants
-export MODULES="intel mvapich2 hpctoolkit/2021.10 papi"
-export ENV_NAME="resource-equivalence-quartz"
+# export MODULES="intel mvapich2 hpctoolkit/2021.10 papi"
+export ENV_NAME="cpu-apps"
 export TIME_LIMIT="00:15:00"
+export HOST="zaratan"
+export QUEUE="standard"
+echo $HOST
 
-# ROOT="/scratch/zt1/project/bhatele-lab/user/amovsesy/cross-modeling-scripts/data-collection"
-ROOT="/Users/movsesyanae/Programming/Research/LLNL/cross-modeling-scripts/data-collection"
+export ROOT="/scratch/zt1/project/bhatele-lab/user/amovsesy/performance-modeling/cross-modeling-scripts/data-collection"
+# export ROOT="/Users/movsesyanae/Programming/Research/LLNL/cross-modeling-scripts/data-collection"
 CONFIG_DIR="${ROOT}/app-arg-configuration/configs"
 
 # enumerate (args, nranks, hpcrun_events) paired with wall time
@@ -41,10 +44,7 @@ function schedule_config {
 }
 
 declare -a hpcrun_events=(
-    "-e PAPI_BR_INS -e PAPI_LD_INS -e PAPI_SR_INS -e PAPI_TOT_INS"
-    "-e PAPI_L1_LDM -e PAPI_L1_STM -e PAPI_L2_LDM -e PAPI_L2_STM -e EPT"
-    "-e bdw_ep::FP_ARITH:SCALAR_SINGLE -e bdw_ep::FP_ARITH:SCALAR_DOUBLE -e bdw_ep::ARITH" 
-    "-e IO -e PAPI_MEM_WCY -e REALTIME"
+    "-e REALTIME"
 )
 
 for FILE in $CONFIG_DIR/*; do 
