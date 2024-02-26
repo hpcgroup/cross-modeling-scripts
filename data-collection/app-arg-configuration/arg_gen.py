@@ -80,6 +80,12 @@ class App:
             self.add_xsbench_args()
         elif name == 'minife':
             self.add_minife_args()
+        elif name == 'amg':
+            self.add_amg_args()
+        elif name == 'halo3d' or name == 'halo3d-26':
+            self.add_halo3d_args()
+        elif name == 'incast':
+            self.add_incast_args()
         else:
             raise ValueError(f'Unknown app name: {name}')
         
@@ -96,6 +102,37 @@ class App:
                     count += 1
                     f.write('{}\n'.format(x))
                 print('Generated {} args.'.format(count))
+    
+    def add_amg_args(self):
+        # for 1 processor
+        self.arg.add_choices('-problem', [2], procs = [1])
+        self.arg.add_choices('-P', ['1 1 1'], procs = [1])
+        self.arg.add_choices('-n', ['256 256 256', '128 128 128', '64 64 64', '32 32 32', '16 16 16','8 8 8'], procs = [1])
+        # for 32 ranks
+        self.arg.add_choices('-problem', [1, 2], procs = [32])
+        self.arg.add_choices('-P', ['2 2 1', '4 4 2'], procs = [32])
+        self.arg.add_choices('-n', ['8 8 4', '16 16 8', '32 32 16', '64 64 32', '128 128 64'], procs = [32])
+
+    def add_halo3d_args(self):
+        self.arg.add_choices('-nx', [10, 15, 20, 25])
+        self.arg.add_choices('-ny', [10, 15, 20, 25])
+        self.arg.add_choices('-nz', [10, 15, 20, 25])
+        self.arg.add_choices('-iterations', [50, 100])
+        
+        self.arg.add_choices('-pex', [1], procs=[1])
+        self.arg.add_choices('-pey', [1], procs=[1])
+        self.arg.add_choices('-pez', [1], procs=[1])
+
+        self.arg.add_choices('-pex', [4], procs=[32])
+        self.arg.add_choices('-pey', [4], procs=[32])
+        self.arg.add_choices('-pez', [2], procs=[32])
+        
+    def add_incast_args(self):
+        self.arg.add_range('-iterations', 1, 11, 1)
+        self.arg.add_choices('-msgsize', [512, 1024, 2048])
+
+    # def add_swfft_args(self):
+    #     self.arg.add_range('-iterations', 1, 11, 1)
 
     def add_laghos_args(self):
         self.arg.add_choices('-p', [1, 2, 3])
@@ -125,7 +162,7 @@ class App:
     def add_xsbench_args(self):
         self.arg.add_choices('-t', [1, 32])
         self.arg.add_choices('-m', ['history', 'event'])
-        self.arg.add_choices('-s', ['small', 'large', 'self.argL', 'self.argself.argL'])
+        self.arg.add_choices('-s', ['small', 'large', 'xL', 'xxL'])
         self.arg.add_choices('-G', ['unionized', 'nuclide', 'hash'])
 
     def add_minife_args(self):
@@ -134,7 +171,7 @@ class App:
         self.arg.add_range('-nz', 50, 200, 25)
 
 # apps = ['laghos', 'kripke', 'lulesh2.0', 'minivite', 'xsbench', 'minife']
-apps = ['laghos', 'lulesh2.0', 'minivite', 'minife']
+apps = ['laghos', 'lulesh2.0', 'minivite', 'minife', 'halo3d-26', 'halo3d', 'amg', 'incast']
 output_folder = 'configs'
 for app in apps:
     a = App(app)
