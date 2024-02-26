@@ -2,11 +2,12 @@
 
 # constants
 # export MODULES="intel mvapich2 hpctoolkit/2021.10 papi"
+export MODULES="intel mvapich2 hpctoolkit/2021.10 papi"
 export ENV_NAME="cpu-apps"
 export TIME_LIMIT="00:15:00"
-export HOST="zaratan"
-export QUEUE="standard"
-echo $HOST
+# export HOST="zaratan"
+# export QUEUE="standard"
+# echo $HOST
 
 export ROOT="/scratch/zt1/project/bhatele-lab/user/amovsesy/performance-modeling/cross-modeling-scripts/data-collection"
 # export ROOT="/Users/movsesyanae/Programming/Research/LLNL/cross-modeling-scripts/data-collection"

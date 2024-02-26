@@ -9,9 +9,9 @@ DATA_ROOT=${ROOT}/data
 export JSON_OUTPUT="results.json"
 JOB_NAME="data-collection-${APP_NAME}"
 SUB_DIR=$(echo "${APP_NAME} ${ARGS} ${NRANKS} ${HPCRUN_EVENTS}" | md5sum | awk '{print $1}')
-# QUEUE="pbatch"
+QUEUE="pbatch"
 
-# HOST=$(hostname)
+HOST=$(hostname)
 
 if [[ ${HOST} == quartz* ]]; then
     SYSTEM="quartz"
@@ -112,8 +112,9 @@ elif [[ ${HOST} == corona* ]]; then
     else
         flux batch -t ${TIME_LIMIT} -N 1 --output=${output} --error=${error} run-corona.flux
     fi
-elif [[ ${HOST} == zaratan* ]]; then
+elif [[ ${HOST} == *zaratan* ]]; then
     SYSTEM="zaratan"
+    QUEUE="standard"
     export WRK_DIR="${DATA_ROOT}/${SYSTEM}/${APP_NAME}/${SUB_DIR}"
     if [ -d ${WRK_DIR} ]; then 
         echo "Directory '${WRK_DIR}' already exists."
