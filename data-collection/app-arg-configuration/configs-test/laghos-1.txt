@@ -1,0 +1,3 @@
+laghos
+1
+-p 1 -dim 2 -rs 1 -tf 3

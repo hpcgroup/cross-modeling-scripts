@@ -74,11 +74,11 @@ class App:
             self.add_kripke_args()
         elif name == 'lulesh2.0':
             self.add_lulesh_args()
-        elif name == 'minivite':
+        elif name == 'miniVite':
             self.add_minivite_args()
-        elif name == 'xsbench':
+        elif name == 'XSBench':
             self.add_xsbench_args()
-        elif name == 'minife':
+        elif name == 'miniFE.x':
             self.add_minife_args()
         elif name == 'amg':
             self.add_amg_args()
@@ -171,7 +171,7 @@ class App:
         self.arg.add_range('-nz', 50, 200, 25)
 
 # apps = ['laghos', 'kripke', 'lulesh2.0', 'minivite', 'xsbench', 'minife']
-apps = ['laghos', 'lulesh2.0', 'minivite', 'minife', 'halo3d-26', 'halo3d', 'amg', 'incast']
+apps = ['laghos', 'lulesh2.0', 'miniVite', 'miniFE.x', 'halo3d-26', 'halo3d', 'amg', 'incast', 'XSBench']
 output_folder = 'configs'
 for app in apps:
     a = App(app)

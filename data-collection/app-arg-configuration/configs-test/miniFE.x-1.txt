@@ -1,0 +1,3 @@
+miniFE.x
+1
+-nself.arg 50 -ny 50 -nz 50

@@ -1,0 +1,3 @@
+miniVite
+1
+-p 1 -n 32
