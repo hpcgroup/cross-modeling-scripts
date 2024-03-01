@@ -1,15 +1,13 @@
 #!/bin/bash
 
 # constants
-# export MODULES="intel mvapich2 hpctoolkit/2021.10 papi"
-export MODULES="intel mvapich2 hpctoolkit/2021.10 papi"
-export ENV_NAME="cpu-apps"
+export ROOT="/p/lustre1/amovses/cross-modeling-scripts/data-collection"
+export MODULES=""
+export ENV_NAME="cpu-apps-generic"
 export TIME_LIMIT="00:15:00"
-# export HOST="zaratan"
-export QUEUE="standard"
-# echo $HOST
+# export TIME_LIMIT="00:15:00"
+export QUEUE="pbatch"
 
-export ROOT="/scratch/zt1/project/bhatele-lab/user/amovsesy/performance-modeling/cross-modeling-scripts/data-collection"
 # export ROOT="/Users/movsesyanae/Programming/Research/LLNL/cross-modeling-scripts/data-collection"
 CONFIG_DIR="${ROOT}/app-arg-configuration/configs"
 
@@ -45,10 +43,12 @@ function schedule_config {
 }
 
 declare -a hpcrun_events=(
-    "-e REALTIME"
+    "-e perf::cpu-cycles -e perf::branch-load-misses -e perf::branch-misses -e perf::context-switches -e perf::iTLB-load-misses -e perf::instructions -e perf::cache-misses -e PAPI_SP_OPS -e PAPI_VEC_SP"
+    "-e perf::branch-loads -e perf::minor-faults -e perf::cache-references -e perf::major-faults -e perf::L1-dcache-load-misses -e perf::branch-instructions -e PAPI_DP_OPS -e PAPI_VEC_DP"
+    "-e perf::page-faults -e perf::cpu-migrations -e perf::L1-icache-load-misses -e perf::L1-dcache-loads -e perf::dTLB-load-misses -e perf::dTLB-loads -e perf::cpu-clock -e perf::task-clock"
 )
 
-for FILE in $CONFIG_DIR/*; do 
+for FILE in $CONFIG_DIR/*.txt; do 
     schedule_config $FILE
 done
 # export APP_NAME="laghos"

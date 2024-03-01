@@ -9,7 +9,7 @@ DATA_ROOT=${ROOT}/data
 export JSON_OUTPUT="results.json"
 JOB_NAME="data-collection-${APP_NAME}"
 SUB_DIR=$(echo "${APP_NAME} ${ARGS} ${NRANKS} ${HPCRUN_EVENTS}" | md5sum | awk '{print $1}')
-QUEUE="pbatch"
+# QUEUE="pbatch"
 
 HOST=$(hostname)
 
@@ -43,9 +43,9 @@ elif [[ ${HOST} == ruby* ]]; then
         exit 1
     else
         if [ ${DRY} -ne 0 ]; then
-            echo "mkdir ${WRK_DIR}"
+            echo "mkdir -p ${WRK_DIR}"
         else
-            mkdir ${WRK_DIR}
+            mkdir -p ${WRK_DIR}
         fi
     fi
 
@@ -53,9 +53,11 @@ elif [[ ${HOST} == ruby* ]]; then
     error="${WRK_DIR}/std.err"
 
     if [ ${DRY} -ne 0 ]; then
-        echo "sbatch -J ${JOB_NAME} -t ${TIME_LIMIT} -n ${NRANKS} --output ${output} --error ${error} -p ${QUEUE} run-ruby.sbatch"
+        echo "sbatch -J ${JOB_NAME} -t ${TIME_LIMIT} -n ${NRANKS} --output ${output} --error ${error} -p ${QUEUE} run-ruby.sh"
     else
-        sbatch -J ${JOB_NAME} -t ${TIME_LIMIT} -n ${NRANKS} --output ${output} --error ${error} -p ${QUEUE} run-ruby.sbatch
+        echo "sbatch -J ${JOB_NAME} -t ${TIME_LIMIT} -n ${NRANKS} --output ${output} --error ${error} -p ${QUEUE} run-ruby.sh"
+        bash run-ruby.sh
+        # sbatch -J ${JOB_NAME} -t ${TIME_LIMIT} -n ${NRANKS} --output ${output} --error ${error} -p ${QUEUE} run-ruby.sh
     fi
 
 elif [[ ${HOST} == lassen* ]]; then
@@ -112,9 +114,38 @@ elif [[ ${HOST} == corona* ]]; then
     else
         flux batch -t ${TIME_LIMIT} -N 1 --output=${output} --error=${error} run-corona.flux
     fi
+elif [[ ${HOST} == tioga* ]]; then
+    SYSTEM="tioga"
+    export WRK_DIR="${DATA_ROOT}/${SYSTEM}/${APP_NAME}/${SUB_DIR}"
+    if [ -d ${WRK_DIR} ]; then 
+        echo "Directory '${WRK_DIR}' already exists."
+        exit 1
+    else
+        if [ ${DRY} -ne 0 ]; then
+            echo "mkdir -p ${WRK_DIR}"
+        else
+            mkdir -p ${WRK_DIR}
+        fi
+    fi
+
+    output="${WRK_DIR}/std.out"
+    error="${WRK_DIR}/std.err"
+
+    # touch $output
+    # touch $error
+    ml flux_wrappers
+
+    if [ ${DRY} -ne 0 ]; then
+        echo "sbatch -J ${JOB_NAME} -t ${TIME_LIMIT} -n ${NRANKS} --output ${output} --error ${error} -p ${QUEUE} run-tioga.sh"
+    else
+        bash run-tioga.sh
+        # flux batch -t ${TIME_LIMIT} -N 1 --output=${output} --error=${error} run-tioga.sh
+        # sbatch -J ${JOB_NAME} -t ${TIME_LIMIT} -n ${NRANKS} --output ${output} --error ${error} -p ${QUEUE} run-tioga.sh
+
+    fi
 elif [[ ${HOST} == *zaratan* ]]; then
     SYSTEM="zaratan"
-    QUEUE="standard"
+    # QUEUE="standard"
     export WRK_DIR="${DATA_ROOT}/${SYSTEM}/${APP_NAME}/${SUB_DIR}"
     if [ -d ${WRK_DIR} ]; then 
         echo "Directory '${WRK_DIR}' already exists."
@@ -137,6 +168,59 @@ elif [[ ${HOST} == *zaratan* ]]; then
     else
         echo "sbatch -J ${JOB_NAME} -t ${TIME_LIMIT} -n ${NRANKS} --output ${output} --error ${error} -p ${QUEUE} run-zaratan.sh"
         sbatch -J ${JOB_NAME} -t ${TIME_LIMIT} -n ${NRANKS} --output ${output} --error ${error} -p ${QUEUE} run-zaratan.sh
+    fi
+elif [[ ${HOST} == mammoth* ]]; then
+    SYSTEM="mammoth"
+    # QUEUE="standard"
+    export WRK_DIR="${DATA_ROOT}/${SYSTEM}/${APP_NAME}/${SUB_DIR}"
+    if [ -d ${WRK_DIR} ]; then 
+        echo "Directory '${WRK_DIR}' already exists."
+        exit 1
+    else
+        if [ ${DRY} -ne 0 ]; then
+            echo "mkdir -p ${WRK_DIR}"
+        else
+            echo "mkdir -p ${WRK_DIR}"
+            mkdir -p ${WRK_DIR}
+        fi
+    fi
+
+    output="${WRK_DIR}/std.out"
+    error="${WRK_DIR}/std.err"
+
+    echo "about to call sbatch"
+    if [ ${DRY} -ne 0 ]; then
+        echo "sbatch -J ${JOB_NAME} -t ${TIME_LIMIT} -n ${NRANKS} --output ${output} --error ${error} -p ${QUEUE} run-mammoth.sh"
+    else
+        echo "sbatch -J ${JOB_NAME} -t ${TIME_LIMIT} -n ${NRANKS} --output ${output} --error ${error} -p ${QUEUE} run-mammoth.sh"
+        # bash run-mammoth.sh
+        sbatch -J ${JOB_NAME} -t ${TIME_LIMIT} -n ${NRANKS} --output ${output} --error ${error} -p ${QUEUE} run-mammoth.sh
+    fi
+elif [[ ${HOST} == ipa* ]]; then
+    SYSTEM="ipa"
+    # QUEUE="standard"
+    export WRK_DIR="${DATA_ROOT}/${SYSTEM}/${APP_NAME}/${SUB_DIR}"
+    if [ -d ${WRK_DIR} ]; then 
+        echo "Directory '${WRK_DIR}' already exists."
+        # exit 1
+    else
+        if [ ${DRY} -ne 0 ]; then
+            echo "mkdir -p ${WRK_DIR}"
+        else
+            echo "mkdir -p ${WRK_DIR}"
+            mkdir -p ${WRK_DIR}
+        fi
+    fi
+
+    output="${WRK_DIR}/std.out"
+    error="${WRK_DIR}/std.err"
+
+    echo "about to call sbatch"
+    if [ ${DRY} -ne 0 ]; then
+        echo "sbatch -J ${JOB_NAME} -t ${TIME_LIMIT} -n ${NRANKS} --output ${output} --error ${error} -p ${QUEUE} run-ipa.sh"
+    else
+        echo "sbatch -J ${JOB_NAME} -t ${TIME_LIMIT} -n ${NRANKS} --output ${output} --error ${error} -p ${QUEUE} run-ipa.sh"
+        sbatch -J ${JOB_NAME} -t ${TIME_LIMIT} -n ${NRANKS} --output ${output} --error ${error} -p ${QUEUE} run-ipa.sh
     fi
 else
     echo "unknown host"
